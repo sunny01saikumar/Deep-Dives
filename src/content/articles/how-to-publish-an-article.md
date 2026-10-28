@@ -49,7 +49,7 @@ Everything below the header is plain Markdown. A few things worth knowing:
 
 - Use `##` for section headings and `###` for sub-sections. Three or more `##` headings add a table of contents at the top.
 - Reading time is worked out for you from the word count.
-- **Bold**, *italic* and [links](https://github.com/sunny01saikumar/deep-dives) work the way you would expect.
+- **Bold**, *italic* and [links](https://github.com/sunny01saikumar/Deep-Dives) work the way you would expect.
 
 > Quotes are set apart with a yellow rule on the left, which makes them easy to find when you scroll back.
 
@@ -64,10 +64,10 @@ function readingTime(words) {
 
 ### Add an image
 
-Put the picture in the `public/images/` folder, then refer to it with the full path, including `/deep-dives`:
+Put the picture in the `public/images/` folder, then refer to it with the full path, including `/Deep-Dives`:
 
 ```md
-![A short description of the picture](/deep-dives/images/tide-chart.png)
+![A short description of the picture](/Deep-Dives/images/tide-chart.png)
 ```
 
 The description matters. It is read aloud to people who cannot see the picture, and shown if the picture fails to load.

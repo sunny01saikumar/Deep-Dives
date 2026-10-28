@@ -2,7 +2,7 @@
 
 A fast, readable website for long-form articles. Articles are plain Markdown files, and every push to `main` rebuilds and publishes the site to GitHub Pages.
 
-**Live site:** https://sunny01saikumar.github.io/deep-dives/
+**Live site:** https://sunny01saikumar.github.io/Deep-Dives/
 
 ## What readers get
 
@@ -52,7 +52,7 @@ A fast, readable website for long-form articles. Articles are plain Markdown fil
 
    The **Actions** tab shows the build. When it turns green the article is live.
 
-Images go in `public/images/` and are used in Markdown as `![Describe the picture](/deep-dives/images/name.png)`.
+Images go in `public/images/` and are used in Markdown as `![Describe the picture](/Deep-Dives/images/name.png)`.
 
 ## First-time setup on GitHub
 

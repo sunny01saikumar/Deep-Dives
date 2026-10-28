@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sunny01saikumar.github.io/deep-dives/sitemap-index.xml
+Sitemap: https://sunny01saikumar.github.io/Deep-Dives/sitemap-index.xml

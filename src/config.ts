@@ -6,5 +6,5 @@ export const SITE = {
     'Long-form articles that take one subject all the way down, written to be read slowly and kept.',
   author: 'Sai Kumar',
   language: 'en',
-  githubUrl: 'https://github.com/sunny01saikumar/deep-dives',
+  githubUrl: 'https://github.com/sunny01saikumar/Deep-Dives',
 } as const;
