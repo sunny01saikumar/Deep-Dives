@@ -7,16 +7,16 @@ const articles = await getArticles();
 
 const years = new Map<number, typeof articles>();
 for (const article of articles) {
-  const year = article.data.pubDate.getUTCFullYear();
+  const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: 'Asia/Kolkata' }).format(article.data.pubDate));
   years.set(year, [...(years.get(year) ?? []), article]);
 }
 ---
 
-<Base title="All articles" description="Every article published on Deep Dives, newest first.">
+<Base title="All stories" description="Every story published on Deep Dives, newest first.">
   <div class="wrap">
     <header class="page-head">
-      <h1 class="page-title">All articles</h1>
-      <p class="page-intro">{articles.length} {articles.length === 1 ? 'article' : 'articles'}, newest first.</p>
+      <h1 class="page-title">All stories</h1>
+      <p class="page-intro">{articles.length} {articles.length === 1 ? 'story' : 'stories'}, newest first.</p>
     </header>
 
     {articles.length === 0 ? (

@@ -3,17 +3,19 @@ interface Props {
   minutes: number;
   /** CSS selector of the element whose scroll progress is measured. */
   target: string;
+  labelLeft: string;
+  labelDone: string;
 }
 
-const { minutes, target } = Astro.props;
+const { minutes, target, labelLeft, labelDone } = Astro.props;
 ---
 
 <!-- Wide screens: a vertical gauge beside the text. It shows how far down you are and how long is left. -->
 <div class="gauge-rail" aria-hidden="true" data-pagefind-ignore>
-  <div class="gauge" data-gauge data-minutes={minutes} data-target={target}>
+  <div class="gauge" data-gauge data-minutes={minutes} data-target={target} data-label-left={labelLeft} data-label-done={labelDone}>
     <div class="gauge-line"></div>
     <div class="gauge-ticks"></div>
-    <div class="gauge-marker"><span class="gauge-label" data-gauge-label>{minutes} min left</span></div>
+    <div class="gauge-marker"><span class="gauge-label" data-gauge-label>{minutes} {labelLeft}</span></div>
   </div>
 </div>
 
@@ -41,7 +43,7 @@ const { minutes, target } = Astro.props;
       bar.style.setProperty('--p', value);
       if (label) {
         const left = Math.ceil(minutes * (1 - progress));
-        label.textContent = progress >= 0.995 ? 'Done' : `${Math.max(1, left)} min left`;
+        label.textContent = progress >= 0.995 ? (gauge.dataset.labelDone ?? 'Done') : `${Math.max(1, left)} ${gauge.dataset.labelLeft ?? 'min left'}`;
       }
     };
 

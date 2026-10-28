@@ -6,16 +6,16 @@ import { url } from '../../lib/url';
 const tags = groupByTag(await getArticles());
 ---
 
-<Base title="Topics" description="Browse Deep Dives articles by topic.">
+<Base title="Topics" description="Browse Deep Dives stories by topic.">
   <div class="wrap">
     <header class="page-head">
       <h1 class="page-title">Topics</h1>
-      <p class="page-intro">Pick a topic to see every article about it.</p>
+      <p class="page-intro">Pick a topic to see every story about it.</p>
     </header>
 
     {tags.length === 0 ? (
       <div class="empty">
-        <p>No topics yet. Add <code>tags: ["example"]</code> to an article to create one.</p>
+        <p>No topics yet. Add <code>tags: ["example"]</code> to a story to create one.</p>
       </div>
     ) : (
       <ul class="topic-list">
@@ -23,7 +23,7 @@ const tags = groupByTag(await getArticles());
           <li>
             <a href={url(`/topics/${tag.slug}/`)}>
               {tag.name}
-              <span>{tag.articles.length} {tag.articles.length === 1 ? 'article' : 'articles'}</span>
+              <span>{tag.articles.length} {tag.articles.length === 1 ? 'story' : 'stories'}</span>
             </a>
           </li>
         ))}

@@ -1,8 +1,13 @@
 ---
 title: "What happens in the second after you open a web page"
 description: "From the address you type to the words on screen: DNS, a handshake, a request and a render, in the order they happen."
-pubDate: 2026-10-22
-tags: ["Web", "Networking"]
+section: technology
+lang: en
+pubDate: 2026-10-22T09:00:00+05:30
+author: "Deep Dives Desk"
+image: "sample-08.jpg"
+imageAlt: "Abstract placeholder picture of yellow and teal tiles on a dark background"
+tags: ["Web", "Networking", "Sample"]
 ---
 
 You press Enter and a page appears. It feels like one step, but your computer has just run a relay race across several systems, each handing the baton to the next. Following the baton is the best way to understand why some pages feel instant and others stall.

@@ -1,0 +1,35 @@
+---
+import { articleHref, type Article } from '../lib/articles';
+import { t } from '../lib/i18n';
+import { url } from '../lib/url';
+import type { Lang } from '../config';
+
+interface Props {
+  items: Article[];
+  breaking: boolean;
+  lang: Lang;
+}
+
+const { items, breaking, lang } = Astro.props;
+const label = t(lang, breaking ? 'breaking' : 'latestTicker');
+// Longer lists scroll for longer so the speed stays readable.
+const duration = Math.max(24, items.length * 9);
+---
+
+{items.length > 0 && (
+  <div class:list={['ticker', { 'is-breaking': breaking }]} style={`--ticker-duration: ${duration}s`}>
+    <div class="wrap ticker-inner">
+      <p class="ticker-label">{label}</p>
+      <div class="ticker-window">
+        <ul class="ticker-track">
+          {items.map((a) => (
+            <li lang={a.data.lang}><a href={url(articleHref(a))}>{a.data.title}</a></li>
+          ))}
+          {items.map((a) => (
+            <li lang={a.data.lang} aria-hidden="true"><a href={url(articleHref(a))} tabindex="-1">{a.data.title}</a></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+)}

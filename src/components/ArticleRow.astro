@@ -1,5 +1,6 @@
 ---
-import { formatDate, minutesToRead, tagSlug, type Article } from '../lib/articles';
+import { articleHref, formatDateTime, minutesToRead, tagSlug, type Article } from '../lib/articles';
+import { sectionLabel, t } from '../lib/i18n';
 import { url } from '../lib/url';
 
 interface Props {
@@ -9,22 +10,23 @@ interface Props {
 }
 
 const { article, level = 'h2' } = Astro.props;
-const { title, description, pubDate, tags, draft } = article.data;
+const { title, description, pubDate, tags, draft, lang, section } = article.data;
 const Heading = level;
 ---
 
-<li class="entry">
-  <time class="entry-date" datetime={pubDate.toISOString()}>{formatDate(pubDate, 'short')}</time>
+<li class="entry" lang={lang}>
+  <time class="entry-date" datetime={pubDate.toISOString()}>{formatDateTime(pubDate, lang, 'short')}</time>
   <div>
     <Heading class="entry-title">
-      <a href={url(`/articles/${article.id}/`)}>{title}</a>
+      <a href={url(articleHref(article))}>{title}</a>
     </Heading>
     <p class="entry-dek">{description}</p>
     <div class="meta">
-      <span>{minutesToRead(article)} min read</span>
+      <span>{sectionLabel(section, lang)}</span>
+      <span>{minutesToRead(article)} {t(lang, 'minRead')}</span>
       {draft && <span>Draft, only visible while writing</span>}
       {tags.length > 0 && (
-        <ul class="tags" aria-label="Topics">
+        <ul class="tags" aria-label={t(lang, 'topics')}>
           {tags.map((tag) => (
             <li><a class="tag" href={url(`/topics/${tagSlug(tag)}/`)}>{tag}</a></li>
           ))}

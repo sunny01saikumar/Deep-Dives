@@ -1,0 +1,125 @@
+---
+import Base from '../layouts/Base.astro';
+import StoryCard from './StoryCard.astro';
+import TrendingList from './TrendingList.astro';
+import VideoEmbed from './VideoEmbed.astro';
+import { LIVE, SITE, type LangFilter } from '../config';
+import { byLang, getArticles, pickFront } from '../lib/articles';
+import { filterHref, pageLang, t } from '../lib/i18n';
+import { findImage } from '../lib/images';
+import { embedSrc, liveChannelSrc, youtubeId } from '../lib/video';
+import { url } from '../lib/url';
+
+interface Props {
+  filter: LangFilter;
+}
+
+const { filter } = Astro.props;
+const lang = pageLang(filter);
+const articles = byLang(await getArticles(), filter);
+const front = pickFront(articles);
+
+const liveSrc = LIVE.videoId ? embedSrc(LIVE.videoId) : LIVE.channelId ? liveChannelSrc(LIVE.channelId) : undefined;
+const featuredVideo = front.videos[0];
+const videoList = liveSrc ? front.videos : front.videos.slice(1);
+const mainVideoId = youtubeId(featuredVideo?.data.video);
+---
+
+<Base filter={filter}>
+  <h1 class="visually-hidden">{SITE.title}: {SITE.tagline}</h1>
+
+  {!front.lead ? (
+    <div class="wrap section-block">
+      <div class="empty">
+        <p>
+          {t(lang, 'noStories')} Add a Markdown file to <code>src/content/articles/</code> or run
+          <code>npm run new</code> to write one.
+        </p>
+      </div>
+    </div>
+  ) : (
+    <div class="wrap front">
+      <section class="top-grid" aria-label={t(lang, 'topStories')}>
+        <StoryCard article={front.lead} variant="lead" level="h2" pageLang={lang} eager />
+        <div class="top-side">
+          {front.secondary.map((a) => <StoryCard article={a} variant="compact" level="h3" pageLang={lang} />)}
+        </div>
+      </section>
+
+      {(front.latest.length > 0 || front.trending.length > 0) && (
+        <div class="main-grid">
+          <section aria-labelledby="latest-title">
+            <div class="section-head">
+              <h2 class="block-title" id="latest-title">{t(lang, 'latest')}</h2>
+              <a href={url('/articles/')}>{t(lang, 'seeAll')}</a>
+            </div>
+            <div class="row-list">
+              {front.latest.map((a) => <StoryCard article={a} variant="row" level="h3" pageLang={lang} />)}
+            </div>
+          </section>
+          <aside>
+            <TrendingList articles={front.trending} lang={lang} />
+          </aside>
+        </div>
+      )}
+
+      {(liveSrc || featuredVideo) && (
+        <section class="video-section" aria-labelledby="videos-title">
+          <div class="section-head">
+            <h2 class="block-title" id="videos-title">{liveSrc ? t(lang, 'live') : t(lang, 'videos')}</h2>
+            <a href={url('/videos/')}>{t(lang, 'seeAll')}</a>
+          </div>
+          <div class="video-grid">
+            <div class="video-main">
+              {liveSrc ? (
+                <VideoEmbed src={liveSrc} title={t(lang, 'live')} lang={lang} />
+              ) : (
+                mainVideoId && (
+                  <>
+                    <VideoEmbed src={embedSrc(mainVideoId)} title={featuredVideo.data.title} poster={findImage(featuredVideo.data.image)} lang={lang} />
+                    <h3 class="video-title" lang={featuredVideo.data.lang}>
+                      <a href={url(`/articles/${featuredVideo.id}/`)}>{featuredVideo.data.title}</a>
+                    </h3>
+                  </>
+                )
+              )}
+            </div>
+            {videoList.length > 0 && (
+              <div class="video-list">
+                {videoList.map((a) => <StoryCard article={a} variant="compact" level="h3" pageLang={lang} />)}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      <div class="section-grid">
+        {front.sections.map(({ section, articles: items }) => (
+          <section class="section-block" aria-labelledby={`s-${section.slug}`}>
+            <h2 class="block-title" id={`s-${section.slug}`}>
+              <a href={filterHref(filter, `/section/${section.slug}/`)}>{section[lang]}</a>
+            </h2>
+            <StoryCard article={items[0]} variant="medium" level="h3" pageLang={lang} />
+            {items.length > 1 && (
+              <div class="text-list">
+                {items.slice(1).map((a) => <StoryCard article={a} variant="text" level="h3" pageLang={lang} />)}
+              </div>
+            )}
+          </section>
+        ))}
+      </div>
+
+      {front.galleries.length > 0 && (
+        <section class="photo-section" aria-labelledby="photos-title">
+          <div class="section-head">
+            <h2 class="block-title" id="photos-title">{t(lang, 'photos')}</h2>
+            <a href={url('/photos/')}>{t(lang, 'seeAll')}</a>
+          </div>
+          <div class="photo-grid">
+            {front.galleries.slice(0, 3).map((a) => <StoryCard article={a} variant="medium" level="h3" pageLang={lang} />)}
+          </div>
+        </section>
+      )}
+    </div>
+  )}
+</Base>

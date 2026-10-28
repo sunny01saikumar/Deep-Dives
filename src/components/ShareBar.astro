@@ -1,0 +1,41 @@
+---
+import { t } from '../lib/i18n';
+import type { Lang } from '../config';
+
+interface Props {
+  title: string;
+  link: string;
+  lang: Lang;
+}
+
+const { title, link, lang } = Astro.props;
+const text = encodeURIComponent(title);
+const u = encodeURIComponent(link);
+---
+
+<div class="share" data-copied={t(lang, 'linkCopied')}>
+  <span class="share-label">{t(lang, 'share')}</span>
+  <a class="share-link" href={`https://wa.me/?text=${text}%20${u}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+  <a class="share-link" href={`https://twitter.com/intent/tweet?text=${text}&url=${u}`} target="_blank" rel="noopener noreferrer">X</a>
+  <a class="share-link" href={`https://www.facebook.com/sharer/sharer.php?u=${u}`} target="_blank" rel="noopener noreferrer">Facebook</a>
+  <button class="share-link share-copy" type="button" data-link={link}>{t(lang, 'copyLink')}</button>
+  <span class="share-status" role="status"></span>
+</div>
+
+<script>
+  document.addEventListener('click', async (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('.share-copy');
+    if (!button) return;
+    const box = button.closest<HTMLElement>('.share');
+    const status = box?.querySelector<HTMLElement>('.share-status');
+    try {
+      await navigator.clipboard.writeText(button.dataset.link ?? location.href);
+      if (status) status.textContent = box?.dataset.copied ?? 'Link copied';
+      window.setTimeout(() => {
+        if (status) status.textContent = '';
+      }, 2500);
+    } catch {
+      window.prompt('', button.dataset.link ?? location.href);
+    }
+  });
+</script>

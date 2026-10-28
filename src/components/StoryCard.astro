@@ -1,0 +1,49 @@
+---
+import Thumb from './Thumb.astro';
+import { articleHref, formatDateTime, hasVideo, type Article } from '../lib/articles';
+import { sectionLabel, t } from '../lib/i18n';
+import { url } from '../lib/url';
+import type { Lang } from '../config';
+
+interface Props {
+  article: Article;
+  /** lead: big picture with headline over it. medium: picture above. compact: small picture beside. row: larger picture beside, with summary. text: headline only. */
+  variant?: 'lead' | 'medium' | 'compact' | 'row' | 'text';
+  level?: 'h2' | 'h3' | 'h4';
+  /** Language of the surrounding page, used for the date format. */
+  pageLang?: Lang;
+  eager?: boolean;
+}
+
+const { article, variant = 'medium', level = 'h3', pageLang = 'en', eager = false } = Astro.props;
+const { title, description, pubDate, lang, section, breaking } = article.data;
+const Heading = level;
+const showThumb = variant !== 'text';
+const showDek = variant === 'lead' || variant === 'medium' || variant === 'row';
+const sizes =
+  variant === 'lead'
+    ? '(min-width: 64rem) 62vw, 100vw'
+    : variant === 'compact'
+      ? '(min-width: 64rem) 12rem, 30vw'
+      : variant === 'row'
+        ? '(min-width: 64rem) 16rem, 34vw'
+        : '(min-width: 64rem) 24rem, 90vw';
+---
+
+<article class={`story story-${variant}`} lang={lang}>
+  {showThumb && (
+    <Thumb article={article} sizes={sizes} loading={eager ? 'eager' : 'lazy'} widths={variant === 'compact' ? [240, 480] : variant === 'row' ? [320, 640] : undefined} />
+  )}
+  <div class="story-body">
+    <Heading class="story-title">
+      <a href={url(articleHref(article))}>{title}</a>
+    </Heading>
+    {showDek && <p class="story-dek">{description}</p>}
+    <p class="story-meta">
+      {breaking && <span class="flag">{t(lang, 'breaking')}</span>}
+      <span>{sectionLabel(section, lang)}</span>
+      {hasVideo(article) && <span>{t(lang, 'videos')}</span>}
+      <time datetime={pubDate.toISOString()}>{formatDateTime(pubDate, pageLang === 'te' || lang === 'te' ? lang : pageLang, 'short')}</time>
+    </p>
+  </div>
+</article>

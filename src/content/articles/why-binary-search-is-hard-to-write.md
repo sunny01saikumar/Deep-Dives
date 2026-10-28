@@ -1,8 +1,13 @@
 ---
 title: "Why binary search is harder to write than it looks"
 description: "The idea fits in one sentence. Getting the code right has tripped up textbooks, professionals and the standard libraries of major languages."
-pubDate: 2026-10-15
-tags: ["Algorithms", "Programming"]
+section: technology
+lang: en
+pubDate: 2026-10-15T10:30:00+05:30
+author: "Deep Dives Desk"
+image: "sample-03.jpg"
+imageAlt: "Abstract placeholder picture of dark and yellow circles on a pale background"
+tags: ["Algorithms", "Programming", "Sample"]
 ---
 
 Binary search is the first clever algorithm most programmers learn, and the explanation takes one sentence: to find a value in a sorted list, look at the middle, then discard the half that cannot contain it, and repeat. A list of a million items needs about twenty looks.

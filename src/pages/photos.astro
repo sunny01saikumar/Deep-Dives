@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import StoryCard from '../components/StoryCard.astro';
+import { getArticles } from '../lib/articles';
+
+const galleries = (await getArticles()).filter((a) => a.data.gallery.length > 0);
+---
+
+<Base title="Photos | ఫోటోలు" description="Photo galleries on Deep Dives.">
+  <div class="wrap">
+    <header class="page-head">
+      <h1 class="page-title">Photos <span lang="te">| ఫోటోలు</span></h1>
+    </header>
+    {galleries.length === 0 ? (
+      <div class="empty">
+        <p>No photo galleries yet. Add a <code>gallery:</code> list to a story.</p>
+      </div>
+    ) : (
+      <div class="card-grid">
+        {galleries.map((a) => <StoryCard article={a} variant="medium" level="h2" />)}
+      </div>
+    )}
+  </div>
+</Base>

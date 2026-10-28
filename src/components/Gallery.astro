@@ -1,0 +1,28 @@
+---
+import { Image } from 'astro:assets';
+import { findImage } from '../lib/images';
+import { t } from '../lib/i18n';
+import type { Lang } from '../config';
+
+interface Props {
+  items: { image: string; alt: string; caption?: string }[];
+  lang: Lang;
+}
+
+const { items, lang } = Astro.props;
+const pictures = items.map((item) => ({ ...item, src: findImage(item.image)! }));
+---
+
+<section class="gallery" aria-label={t(lang, 'photos')}>
+  <h2 class="block-title">{t(lang, 'photos')} <span class="count">{items.length}</span></h2>
+  <ul class="gallery-track" tabindex="0" aria-label={`${t(lang, 'photos')}: ${items.length}`}>
+    {pictures.map((p) => (
+      <li>
+        <figure>
+          <Image src={p.src} alt={p.alt} widths={[640, 960, 1280]} sizes="(min-width: 64rem) 40rem, 85vw" loading="lazy" format="webp" />
+          {p.caption && <figcaption>{p.caption}</figcaption>}
+        </figure>
+      </li>
+    ))}
+  </ul>
+</section>

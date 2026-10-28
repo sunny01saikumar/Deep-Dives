@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import StoryCard from './StoryCard.astro';
+import TrendingList from './TrendingList.astro';
+import { SECTIONS, type LangFilter } from '../config';
+import { byLang, bySection, getArticles, pickFront } from '../lib/articles';
+import { pageLang, t } from '../lib/i18n';
+
+interface Props {
+  filter: LangFilter;
+  slug: string;
+}
+
+const { filter, slug } = Astro.props;
+const lang = pageLang(filter);
+const section = SECTIONS.find((s) => s.slug === slug)!;
+const all = byLang(await getArticles(), filter);
+const items = bySection(all, slug);
+const [lead, ...rest] = items;
+const { trending } = pickFront(all);
+const label = section[lang];
+---
+
+<Base title={label} description={`${label}: ${t(lang, 'latest')}`} filter={filter}>
+  <div class="wrap">
+    <header class="page-head">
+      <h1 class="page-title">{label}</h1>
+    </header>
+
+    {!lead ? (
+      <div class="empty"><p>{t(lang, 'noStories')}</p></div>
+    ) : (
+      <div class="main-grid">
+        <div>
+          <StoryCard article={lead} variant="lead" level="h2" pageLang={lang} eager />
+          <div class="row-list row-list-spaced">
+            {rest.map((a) => <StoryCard article={a} variant="row" level="h2" pageLang={lang} />)}
+          </div>
+        </div>
+        <aside>
+          <TrendingList articles={trending} lang={lang} />
+        </aside>
+      </div>
+    )}
+  </div>
+</Base>

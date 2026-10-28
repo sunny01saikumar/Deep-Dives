@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import StoryCard from '../components/StoryCard.astro';
+import { getArticles, hasVideo } from '../lib/articles';
+
+const videos = (await getArticles()).filter(hasVideo);
+---
+
+<Base title="Videos | వీడియోలు" description="Every video story on Deep Dives.">
+  <div class="wrap">
+    <header class="page-head">
+      <h1 class="page-title">Videos <span lang="te">| వీడియోలు</span></h1>
+    </header>
+    {videos.length === 0 ? (
+      <div class="empty">
+        <p>No video stories yet. Add <code>video: "https://www.youtube.com/watch?v=..."</code> to a story.</p>
+      </div>
+    ) : (
+      <div class="card-grid">
+        {videos.map((a) => <StoryCard article={a} variant="medium" level="h2" />)}
+      </div>
+    )}
+  </div>
+</Base>

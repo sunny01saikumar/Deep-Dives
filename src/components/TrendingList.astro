@@ -1,0 +1,30 @@
+---
+import { articleHref, type Article } from '../lib/articles';
+import { sectionLabel, t } from '../lib/i18n';
+import { url } from '../lib/url';
+import type { Lang } from '../config';
+
+interface Props {
+  articles: Article[];
+  lang: Lang;
+  /** Heading level for the title. */
+  level?: 'h2' | 'h3';
+}
+
+const { articles, lang, level = 'h2' } = Astro.props;
+const Heading = level;
+---
+
+{articles.length > 0 && (
+  <section class="trending" aria-labelledby="trending-title">
+    <Heading class="block-title" id="trending-title">{t(lang, 'trending')}</Heading>
+    <ol class="trending-list">
+      {articles.map((a) => (
+        <li lang={a.data.lang}>
+          <a href={url(articleHref(a))}>{a.data.title}</a>
+          <span>{sectionLabel(a.data.section, a.data.lang)}</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+)}

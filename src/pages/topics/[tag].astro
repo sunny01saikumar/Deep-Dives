@@ -12,12 +12,12 @@ export async function getStaticPaths() {
 const { tag } = Astro.props;
 ---
 
-<Base title={tag.name} description={`Articles about ${tag.name} on Deep Dives.`}>
+<Base title={tag.name} description={`Stories about ${tag.name} on Deep Dives.`}>
   <div class="wrap">
     <header class="page-head">
       <h1 class="page-title">{tag.name}</h1>
       <p class="page-intro">
-        {tag.articles.length} {tag.articles.length === 1 ? 'article' : 'articles'}.
+        {tag.articles.length} {tag.articles.length === 1 ? 'story' : 'stories'}.
         <a href={url('/topics/')}>Browse all topics</a>
       </p>
     </header>

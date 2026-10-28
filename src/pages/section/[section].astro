@@ -1,0 +1,12 @@
+---
+import SectionPage from '../../components/SectionPage.astro';
+import { SECTIONS } from '../../config';
+
+export function getStaticPaths() {
+  return SECTIONS.map((s) => ({ params: { section: s.slug } }));
+}
+
+const { section } = Astro.params;
+---
+
+<SectionPage filter="all" slug={section!} />

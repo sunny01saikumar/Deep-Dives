@@ -1,0 +1,12 @@
+---
+import SectionPage from '../../../components/SectionPage.astro';
+import { LANGUAGES, SECTIONS } from '../../../config';
+
+export function getStaticPaths() {
+  return LANGUAGES.flatMap((l) => SECTIONS.map((s) => ({ params: { lang: l.code, section: s.slug } })));
+}
+
+const { lang, section } = Astro.params;
+---
+
+<SectionPage filter={lang as 'en' | 'te'} slug={section!} />

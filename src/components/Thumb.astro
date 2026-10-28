@@ -1,0 +1,26 @@
+---
+import { Image } from 'astro:assets';
+import { findImage } from '../lib/images';
+import { sectionLabel } from '../lib/i18n';
+import type { Article } from '../lib/articles';
+
+interface Props {
+  article: Article;
+  sizes?: string;
+  widths?: number[];
+  loading?: 'lazy' | 'eager';
+}
+
+const { article, sizes = '(min-width: 64rem) 30vw, 90vw', widths = [320, 640, 960, 1280], loading = 'lazy' } = Astro.props;
+const image = findImage(article.data.image);
+---
+
+<div class="thumb">
+  {image ? (
+    <Image src={image} alt="" widths={widths} sizes={sizes} loading={loading} decoding="async" format="webp" />
+  ) : (
+    <div class="thumb-fallback">
+      <span lang={article.data.lang}>{sectionLabel(article.data.section, article.data.lang)}</span>
+    </div>
+  )}
+</div>

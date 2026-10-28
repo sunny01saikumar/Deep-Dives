@@ -1,86 +1,171 @@
 ---
+import { Image, getImage } from 'astro:assets';
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import DepthGauge from '../../components/DepthGauge.astro';
-import { formatDate, getArticles, minutesToRead, tagSlug } from '../../lib/articles';
+import Gallery from '../../components/Gallery.astro';
+import ShareBar from '../../components/ShareBar.astro';
+import StoryCard from '../../components/StoryCard.astro';
+import TrendingList from '../../components/TrendingList.astro';
+import VideoEmbed from '../../components/VideoEmbed.astro';
+import {
+  articleHref,
+  byLang,
+  bySection,
+  formatDateTime,
+  getArticles,
+  minutesToRead,
+  tagSlug,
+} from '../../lib/articles';
+import { filterHref, sectionLabel, t } from '../../lib/i18n';
+import { findImage } from '../../lib/images';
+import { embedSrc, youtubeId } from '../../lib/video';
 import { url } from '../../lib/url';
 
 export async function getStaticPaths() {
   const articles = await getArticles();
-  return articles.map((article, index) => ({
-    params: { slug: article.id },
-    props: {
-      article,
-      newer: articles[index - 1],
-      older: articles[index + 1],
-    },
-  }));
+  return articles.map((article) => {
+    const sameSection = bySection(articles, article.data.section);
+    const index = sameSection.indexOf(article);
+    return {
+      params: { slug: article.id },
+      props: {
+        article,
+        newer: sameSection[index - 1],
+        older: sameSection[index + 1],
+        related: sameSection.filter((a) => a !== article).slice(0, 4),
+        trending: byLang(articles, article.data.lang)
+          .filter((a) => a.data.trending && a !== article)
+          .slice(0, 5),
+      },
+    };
+  });
 }
 
-const { article, newer, older } = Astro.props;
+const { article, newer, older, related, trending } = Astro.props;
 const { Content, headings } = await render(article);
-const { title, description, pubDate, updatedDate, tags } = article.data;
+const { title, description, pubDate, updatedDate, tags, lang, section, author, breaking } = article.data;
+
 const minutes = minutesToRead(article);
+const longRead = minutes >= 4;
 const toc = headings.filter((h) => h.depth === 2);
+const cover = findImage(article.data.image);
+const videoId = youtubeId(article.data.video);
+const label = sectionLabel(section, lang);
+const permalink = new URL(url(articleHref(article)), Astro.site).href;
+
+let shareImage: string | undefined;
+if (cover) {
+  const og = await getImage({ src: cover, width: 1200, format: 'jpg' });
+  shareImage = new URL(og.src, Astro.site).href;
+}
 ---
 
-<Base title={title} description={description} type="article" pubDate={pubDate} updatedDate={updatedDate} tags={tags}>
-  <article class="wrap" data-pagefind-body>
-    <div class="article-grid">
-      <header class="col col-wide article-head">
-        <div class="inner">
-          <h1 class="article-title">{title}</h1>
-          <p class="article-dek">{description}</p>
-          <div class="meta">
-            <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
-            {updatedDate && <span>Updated <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time></span>}
-            <span>{minutes} min read</span>
+<Base
+  title={title}
+  description={description}
+  type="article"
+  pubDate={pubDate}
+  updatedDate={updatedDate}
+  tags={tags}
+  filter={lang}
+  htmlLang={lang}
+  image={shareImage}
+  imageAlt={article.data.imageAlt}
+>
+  <div class="wrap article-page">
+    <article class="article-main" lang={lang} data-pagefind-body>
+      <div class:list={['article-cols', { 'has-gauge': longRead }]}>
+        {longRead && <DepthGauge minutes={minutes} target=".prose" labelLeft={t(lang, 'minLeft')} labelDone={t(lang, 'done')} />}
+
+        <div class="article-content">
+          <header class="article-head">
+            <p class="kicker" data-pagefind-ignore>
+              <a href={filterHref(lang, `/section/${section}/`)}>{label}</a>
+              {breaking && <span class="flag">{t(lang, 'breaking')}</span>}
+            </p>
+            <h1 class="article-title">{title}</h1>
+            <p class="article-dek">{description}</p>
+            <div class="byline" data-pagefind-ignore>
+              {author && <span>{t(lang, 'by')} {author}</span>}
+              <span>{t(lang, 'published')} <time datetime={pubDate.toISOString()}>{formatDateTime(pubDate, lang)} IST</time></span>
+              {updatedDate && <span>{t(lang, 'updated')} <time datetime={updatedDate.toISOString()}>{formatDateTime(updatedDate, lang)} IST</time></span>}
+              <span>{minutes} {t(lang, 'minRead')}</span>
+            </div>
+            <div data-pagefind-ignore>
+              <ShareBar title={title} link={permalink} lang={lang} />
+            </div>
+          </header>
+
+          {videoId ? (
+            <div class="cover" data-pagefind-ignore>
+              <VideoEmbed src={embedSrc(videoId)} title={title} poster={cover} lang={lang} />
+            </div>
+          ) : (
+            cover && (
+              <figure class="cover" data-pagefind-ignore>
+                <Image src={cover} alt={article.data.imageAlt ?? ''} widths={[640, 960, 1280, 1600]} sizes="(min-width: 64rem) 46rem, 100vw" loading="eager" format="webp" />
+                {article.data.imageCaption && <figcaption>{article.data.imageCaption}</figcaption>}
+              </figure>
+            )
+          )}
+
+          {longRead && toc.length >= 3 && (
+            <nav class="toc-wrap" aria-label={t(lang, 'contents')} data-pagefind-ignore>
+              <details class="toc">
+                <summary>{t(lang, 'contents')}</summary>
+                <ol>
+                  {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
+                </ol>
+              </details>
+            </nav>
+          )}
+
+          <div class="prose">
+            <Content />
           </div>
+
+          {article.data.gallery.length > 0 && <Gallery items={article.data.gallery} lang={lang} />}
+
+          <footer class="article-foot" data-pagefind-ignore>
+            {tags.length > 0 && (
+              <ul class="tags" aria-label={t(lang, 'topics')}>
+                {tags.map((tag) => (
+                  <li><a class="tag" href={url(`/topics/${tagSlug(tag)}/`)}>{tag}</a></li>
+                ))}
+              </ul>
+            )}
+            {(newer || older) && (
+              <nav class="pager" aria-label={`${t(lang, 'moreIn')} ${label}`}>
+                {newer && (
+                  <a class="prev" href={url(articleHref(newer))} rel="prev" lang={newer.data.lang}>
+                    <span class="dir">{t(lang, 'newer')}</span>
+                    {newer.data.title}
+                  </a>
+                )}
+                {older && (
+                  <a class="next" href={url(articleHref(older))} rel="next" lang={older.data.lang}>
+                    <span class="dir">{t(lang, 'older')}</span>
+                    {older.data.title}
+                  </a>
+                )}
+              </nav>
+            )}
+          </footer>
         </div>
-      </header>
-
-      <DepthGauge minutes={minutes} target=".prose" />
-
-      {toc.length >= 3 && (
-        <nav class="col toc-wrap" aria-label="In this article" data-pagefind-ignore>
-          <details class="toc">
-            <summary>In this article</summary>
-            <ol>
-              {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
-            </ol>
-          </details>
-        </nav>
-      )}
-
-      <div class="col prose">
-        <Content />
       </div>
+    </article>
 
-      <footer class="col article-foot" data-pagefind-ignore>
-        {tags.length > 0 && (
-          <ul class="tags" aria-label="Topics">
-            {tags.map((tag) => (
-              <li><a class="tag" href={url(`/topics/${tagSlug(tag)}/`)}>{tag}</a></li>
-            ))}
-          </ul>
-        )}
-        {(newer || older) && (
-          <nav class="pager" aria-label="More articles">
-            {newer && (
-              <a class="prev" href={url(`/articles/${newer.id}/`)} rel="prev">
-                <span class="dir">Newer</span>
-                {newer.data.title}
-              </a>
-            )}
-            {older && (
-              <a class="next" href={url(`/articles/${older.id}/`)} rel="next">
-                <span class="dir">Older</span>
-                {older.data.title}
-              </a>
-            )}
-          </nav>
-        )}
-      </footer>
-    </div>
-  </article>
+    <aside class="article-side" data-pagefind-ignore>
+      {related.length > 0 && (
+        <section aria-labelledby="related-title">
+          <h2 class="block-title" id="related-title">{t(lang, 'moreIn')} {label}</h2>
+          <div class="side-list">
+            {related.map((a) => <StoryCard article={a} variant="compact" level="h3" pageLang={lang} />)}
+          </div>
+        </section>
+      )}
+      <TrendingList articles={trending} lang={lang} />
+    </aside>
+  </div>
 </Base>
