@@ -1,0 +1,28 @@
+---
+import Base from '../../layouts/Base.astro';
+import ArticleRow from '../../components/ArticleRow.astro';
+import { getArticles, groupByTag } from '../../lib/articles';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const tags = groupByTag(await getArticles());
+  return tags.map((tag) => ({ params: { tag: tag.slug }, props: { tag } }));
+}
+
+const { tag } = Astro.props;
+---
+
+<Base title={tag.name} description={`Articles about ${tag.name} on Deep Dives.`}>
+  <div class="wrap">
+    <header class="page-head">
+      <h1 class="page-title">{tag.name}</h1>
+      <p class="page-intro">
+        {tag.articles.length} {tag.articles.length === 1 ? 'article' : 'articles'}.
+        <a href={url('/topics/')}>Browse all topics</a>
+      </p>
+    </header>
+    <ul class="entries">
+      {tag.articles.map((article) => <ArticleRow article={article} level="h2" />)}
+    </ul>
+  </div>
+</Base>

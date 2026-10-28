@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+import ArticleRow from '../../components/ArticleRow.astro';
+import { getArticles } from '../../lib/articles';
+
+const articles = await getArticles();
+
+const years = new Map<number, typeof articles>();
+for (const article of articles) {
+  const year = article.data.pubDate.getUTCFullYear();
+  years.set(year, [...(years.get(year) ?? []), article]);
+}
+---
+
+<Base title="All articles" description="Every article published on Deep Dives, newest first.">
+  <div class="wrap">
+    <header class="page-head">
+      <h1 class="page-title">All articles</h1>
+      <p class="page-intro">{articles.length} {articles.length === 1 ? 'article' : 'articles'}, newest first.</p>
+    </header>
+
+    {articles.length === 0 ? (
+      <div class="empty">
+        <p>Nothing published yet. Add a Markdown file to <code>src/content/articles/</code>.</p>
+      </div>
+    ) : (
+      [...years].map(([year, items]) => (
+        <section aria-labelledby={`y${year}`}>
+          <h2 class="year-heading" id={`y${year}`}>{year}</h2>
+          <ul class="entries">
+            {items.map((article) => <ArticleRow article={article} level="h3" />)}
+          </ul>
+        </section>
+      ))
+    )}
+  </div>
+</Base>

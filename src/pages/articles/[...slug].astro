@@ -1,0 +1,86 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import DepthGauge from '../../components/DepthGauge.astro';
+import { formatDate, getArticles, minutesToRead, tagSlug } from '../../lib/articles';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const articles = await getArticles();
+  return articles.map((article, index) => ({
+    params: { slug: article.id },
+    props: {
+      article,
+      newer: articles[index - 1],
+      older: articles[index + 1],
+    },
+  }));
+}
+
+const { article, newer, older } = Astro.props;
+const { Content, headings } = await render(article);
+const { title, description, pubDate, updatedDate, tags } = article.data;
+const minutes = minutesToRead(article);
+const toc = headings.filter((h) => h.depth === 2);
+---
+
+<Base title={title} description={description} type="article" pubDate={pubDate} updatedDate={updatedDate} tags={tags}>
+  <article class="wrap" data-pagefind-body>
+    <div class="article-grid">
+      <header class="col col-wide article-head">
+        <div class="inner">
+          <h1 class="article-title">{title}</h1>
+          <p class="article-dek">{description}</p>
+          <div class="meta">
+            <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+            {updatedDate && <span>Updated <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time></span>}
+            <span>{minutes} min read</span>
+          </div>
+        </div>
+      </header>
+
+      <DepthGauge minutes={minutes} target=".prose" />
+
+      {toc.length >= 3 && (
+        <nav class="col toc-wrap" aria-label="In this article" data-pagefind-ignore>
+          <details class="toc">
+            <summary>In this article</summary>
+            <ol>
+              {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
+            </ol>
+          </details>
+        </nav>
+      )}
+
+      <div class="col prose">
+        <Content />
+      </div>
+
+      <footer class="col article-foot" data-pagefind-ignore>
+        {tags.length > 0 && (
+          <ul class="tags" aria-label="Topics">
+            {tags.map((tag) => (
+              <li><a class="tag" href={url(`/topics/${tagSlug(tag)}/`)}>{tag}</a></li>
+            ))}
+          </ul>
+        )}
+        {(newer || older) && (
+          <nav class="pager" aria-label="More articles">
+            {newer && (
+              <a class="prev" href={url(`/articles/${newer.id}/`)} rel="prev">
+                <span class="dir">Newer</span>
+                {newer.data.title}
+              </a>
+            )}
+            {older && (
+              <a class="next" href={url(`/articles/${older.id}/`)} rel="next">
+                <span class="dir">Older</span>
+                {older.data.title}
+              </a>
+            )}
+          </nav>
+        )}
+      </footer>
+    </div>
+  </article>
+</Base>

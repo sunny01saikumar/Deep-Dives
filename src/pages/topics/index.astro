@@ -1,0 +1,33 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getArticles, groupByTag } from '../../lib/articles';
+import { url } from '../../lib/url';
+
+const tags = groupByTag(await getArticles());
+---
+
+<Base title="Topics" description="Browse Deep Dives articles by topic.">
+  <div class="wrap">
+    <header class="page-head">
+      <h1 class="page-title">Topics</h1>
+      <p class="page-intro">Pick a topic to see every article about it.</p>
+    </header>
+
+    {tags.length === 0 ? (
+      <div class="empty">
+        <p>No topics yet. Add <code>tags: ["example"]</code> to an article to create one.</p>
+      </div>
+    ) : (
+      <ul class="topic-list">
+        {tags.map((tag) => (
+          <li>
+            <a href={url(`/topics/${tag.slug}/`)}>
+              {tag.name}
+              <span>{tag.articles.length} {tag.articles.length === 1 ? 'article' : 'articles'}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</Base>

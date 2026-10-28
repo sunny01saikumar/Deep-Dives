@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/url';
+---
+
+<Base title="Page not found" description="That page does not exist.">
+  <div class="wrap not-found">
+    <h1 class="page-title">That page isn't here</h1>
+    <p>The address may have a typo, or the article was moved. Try the full list instead.</p>
+    <a class="button-link" href={url('/articles/')}>See all articles</a>
+  </div>
+</Base>

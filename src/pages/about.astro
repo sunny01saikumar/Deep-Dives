@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../config';
+import { url } from '../lib/url';
+---
+
+<Base title="About" description={`About ${SITE.title} and who writes it.`}>
+  <div class="wrap">
+    <header class="page-head">
+      <h1 class="page-title">About</h1>
+    </header>
+    <div class="prose" style="max-width: var(--measure)">
+      <p>
+        {SITE.title} is a collection of long articles that each stay with one subject until it makes sense.
+        Every article shows how many minutes it takes to read, and a gauge in the margin shows how far down you are.
+      </p>
+      <p>
+        The articles are written by {SITE.author}. Follow along with the <a href={url('/rss.xml')}>RSS feed</a>, or
+        read the <a href={SITE.githubUrl}>source on GitHub</a>.
+      </p>
+      <p>
+        Press <code>/</code> on any page to search every article.
+      </p>
+    </div>
+  </div>
+</Base>

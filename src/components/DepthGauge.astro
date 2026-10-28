@@ -1,0 +1,59 @@
+---
+interface Props {
+  minutes: number;
+  /** CSS selector of the element whose scroll progress is measured. */
+  target: string;
+}
+
+const { minutes, target } = Astro.props;
+---
+
+<!-- Wide screens: a vertical gauge beside the text. It shows how far down you are and how long is left. -->
+<div class="gauge-rail" aria-hidden="true" data-pagefind-ignore>
+  <div class="gauge" data-gauge data-minutes={minutes} data-target={target}>
+    <div class="gauge-line"></div>
+    <div class="gauge-ticks"></div>
+    <div class="gauge-marker"><span class="gauge-label" data-gauge-label>{minutes} min left</span></div>
+  </div>
+</div>
+
+<!-- Narrow screens: a thin bar along the top edge -->
+<div class="progress-bar" data-gauge-bar aria-hidden="true"></div>
+
+<script>
+  const gauge = document.querySelector<HTMLElement>('[data-gauge]');
+  const bar = document.querySelector<HTMLElement>('[data-gauge-bar]');
+  const label = document.querySelector<HTMLElement>('[data-gauge-label]');
+
+  if (gauge && bar) {
+    const minutes = Number(gauge.dataset.minutes) || 1;
+    const article = document.querySelector<HTMLElement>(gauge.dataset.target ?? 'article');
+    let ticking = false;
+
+    const update = () => {
+      ticking = false;
+      if (!article) return;
+      const top = article.getBoundingClientRect().top + window.scrollY;
+      const scrollable = article.offsetHeight - window.innerHeight * 0.6;
+      const progress = Math.min(1, Math.max(0, (window.scrollY + window.innerHeight * 0.3 - top) / Math.max(1, scrollable)));
+      const value = progress.toFixed(4);
+      gauge.style.setProperty('--p', value);
+      bar.style.setProperty('--p', value);
+      if (label) {
+        const left = Math.ceil(minutes * (1 - progress));
+        label.textContent = progress >= 0.995 ? 'Done' : `${Math.max(1, left)} min left`;
+      }
+    };
+
+    const request = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request);
+    update();
+  }
+</script>

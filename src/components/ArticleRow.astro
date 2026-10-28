@@ -1,0 +1,35 @@
+---
+import { formatDate, minutesToRead, tagSlug, type Article } from '../lib/articles';
+import { url } from '../lib/url';
+
+interface Props {
+  article: Article;
+  /** Use 'h3' when the list sits under an h2 section title. */
+  level?: 'h2' | 'h3';
+}
+
+const { article, level = 'h2' } = Astro.props;
+const { title, description, pubDate, tags, draft } = article.data;
+const Heading = level;
+---
+
+<li class="entry">
+  <time class="entry-date" datetime={pubDate.toISOString()}>{formatDate(pubDate, 'short')}</time>
+  <div>
+    <Heading class="entry-title">
+      <a href={url(`/articles/${article.id}/`)}>{title}</a>
+    </Heading>
+    <p class="entry-dek">{description}</p>
+    <div class="meta">
+      <span>{minutesToRead(article)} min read</span>
+      {draft && <span>Draft, only visible while writing</span>}
+      {tags.length > 0 && (
+        <ul class="tags" aria-label="Topics">
+          {tags.map((tag) => (
+            <li><a class="tag" href={url(`/topics/${tagSlug(tag)}/`)}>{tag}</a></li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>
+</li>
